@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class 9 Test Series</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        #test-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            margin: auto;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 28px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 16px;
+            background-color: #f4f4f4;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        select:hover {
+            background-color: #e0e0e0;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #score-container {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 20px;
+            color: #333;
+        }
+
+        #pie-chart-container {
+            width: 100%;
+            height: 300px;
+            margin-top: 30px;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #fafafa;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .question:hover {
+            transform: scale(1.05);
+        }
+
+        .question p {
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .question input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .question-number {
+            font-size: 18px;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="test-container">
+        <h1>Class 9 Test Series</h1>
+        <select id="subject-selector" onchange="loadSubject()">
+            <option value="">Select Subject</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="math">Mathematics</option>
+            <option value="biology">Biology</option>
+        </select>
+        <div id="questions-container"></div>
+        <button onclick="calculateScore()">Submit</button>
+        <div id="score-container"></div>
+        <div id="pie-chart-container">
+            <canvas id="pie-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const subjects = {
+            physics: [
+                { question: "What is the SI unit of force?", options: ["Newton", "Joule", "Meter", "Second"], answer: "Newton" },
+                { question: "What is the speed of light?", options: ["300,000 km/s", "150,000 km/s", "400,000 km/s", "500,000 km/s"], answer: "300,000 km/s" },
+                { question: "Who is known for the law of gravitation?", options: ["Einstein", "Newton", "Galileo", "Tesla"], answer: "Newton" },
+                { question: "What is the formula for kinetic energy?", options: ["1/2 mv^2", "mv^2", "mgh", "1/2 m^2v"], answer: "1/2 mv^2" },
+                { question: "What type of energy does a moving car have?", options: ["Kinetic", "Potential", "Heat", "Sound"], answer: "Kinetic" }
+            ],
+            chemistry: [
+                { question: "What is the chemical symbol for water?", options: ["H2O", "CO2", "O2", "H2"], answer: "H2O" },
+                { question: "Which element is represented by the symbol Na?", options: ["Sodium", "Nitrogen", "Neon", "Noble gas"], answer: "Sodium" },
+                { question: "What is the pH of vinegar?", options: ["4-5", "7", "9", "12"], answer: "4-5" },
+                { question: "What is the atomic number of Oxygen?", options: ["6", "8", "10", "12"], answer: "8" },
+                { question: "What is the chemical formula for methane?", options: ["CH4", "C2H6", "CO2", "C6H12O6"], answer: "CH4" }
+            ],
+            math: [
+                { question: "What is 25 + 17?", options: ["42", "39", "45", "30"], answer: "42" },
+                { question: "What is 10 × 15?", options: ["150", "100", "120", "130"], answer: "150" },
+                { question: "What is the square root of 144?", options: ["12", "14", "10", "16"], answer: "12" },
+                { question: "What is the value of π (pi)?", options: ["3.14", "3", "2.71", "3.1416"], answer: "3.14" },
+                { question: "What is the area of a triangle with base 6 and height 10?", options: ["30", "60", "40", "20"], answer: "30" }
+            ],
+            biology: [
+                { question: "What is the process of photosynthesis?", options: ["The process by which plants make food", "The process of cell division", "The breakdown of glucose", "The movement of water in plants"], answer: "The process by which plants make food" },
+                { question: "What is the function of the heart?", options: ["Pumps blood throughout the body", "Filters toxins", "Produces energy", "Stores glucose"], answer: "Pumps blood throughout the body" },
+                { question: "Which of these is a mammal?", options: ["Shark", "Penguin", "Human", "Crocodile"], answer: "Human" },
+                { question: "What is the main function of red blood cells?", options: ["Carry oxygen", "Fight infection", "Clot blood", "Transport hormones"], answer: "Carry oxygen" },
+                { question: "What is the main organ of the digestive system?", options: ["Stomach", "Liver", "Lungs", "Heart"], answer: "Stomach" }
+            ]
+        };
+
+        let grade = '';
+        
+        function loadSubject() {
+            const subject = document.getElementById("subject-selector").value;
+            const questionsContainer = document.getElementById("questions-container");
+            questionsContainer.innerHTML = "";
+            if (subject) {
+                const questions = subjects[subject];
+                questions.forEach((q, index) => {
+                    questionsContainer.innerHTML += `
+                        <div class="question">
+                            <p class="question-number">Question ${index + 1}</p>
+                            <p>${q.question}</p>
+                            <input type="radio" name="q${index}" value="${q.options[0]}"> ${q.options[0]}<br>
+                            <input type="radio" name="q${index}" value="${q.options[1]}"> ${q.options[1]}<br>
+                            <input type="radio" name="q${index}" value="${q.options[2]}"> ${q.options[2]}<br>
+                            <input type="radio" name="q${index}" value="${q.options[3]}"> ${q.options[3]}<br>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        function calculateScore() {
+            const subject = document.getElementById("subject-selector").value;
+            const questions = subjects[subject];
+            let score = 0;
+
+            questions.forEach((q, index) => {
+                const selectedAnswer = document.querySelector(`input[name="q${index}"]:checked`);
+                if (selectedAnswer && selectedAnswer.value === q.answer) {
+                    score++;
+                }
+            });
+
+            let grade = '';
+            if (score === 5) {
+                grade = 'A';
+            } else if (score === 4) {
+                grade = 'B';
+            } else if (score === 3) {
+                grade = 'C';
+            } else {
+                grade = 'D';
+            }
+
+            // Display score and grade
+            const scoreContainer = document.getElementById("score-container");
+            scoreContainer.innerHTML = `You scored ${score}/5. Grade: ${grade}.`;
+
+            // Pie chart data
+            const pieChartData = {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    data: [score, 5 - score],
+                    backgroundColor: ['#4CAF50', '#FF6347'],
+                    hoverBackgroundColor: ['#45a049', '#FF4500']
+                }]
+            };
+
+            // Create pie chart
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: pieChartData
+            });
+
+            // Voice feedback for grade
+            const speech = new SpeechSynthesisUtterance(`You scored ${score} out of 5. Your grade is ${grade}`);
+            window.speechSynthesis.speak(speech);
+        }
+    </script>
+</body>
+</html>
